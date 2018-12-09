@@ -7,6 +7,7 @@ from tensorflow.python.keras.applications.resnet50 import preprocess_input
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.python.keras.preprocessing.image import load_img, img_to_array
 from tensorflow.python.keras.models import load_model
+from tensorflow.python.keras.callbacks import EarlyStopping
 
 from src.data.download_data import download_google_images
 
@@ -43,7 +44,16 @@ def initialize_project(thing1, thing2):
     return data_dir, model_dir
 
 
-def fit_model(data_dir, model_dir, epochs=3):
+def fit_model(data_dir, model_dir, max_epochs=10, batch_size=20):
+    """
+    Uses transfer learning to replace the last layer of ResNet50 to train a binary classifier
+    Saves the model wihtin model_dir
+    :param data_dir: Path to data root
+    :param model_dir: Path to model root
+    :param max_epochs: Maximum number of epochs to run
+    :param batch_size: Number of images per batch
+    :return: a tuple of model, history
+    """
     # Specify Model
     model = Sequential()
     model.add(ResNet50(include_top=False, pooling='avg', weights=RESNET_WEIGHTS_PATH))
@@ -59,7 +69,7 @@ def fit_model(data_dir, model_dir, epochs=3):
     train_generator = data_generator.flow_from_directory(
         f'{data_dir}/train',
         target_size=(IMAGE_SIZE, IMAGE_SIZE),
-        batch_size=24,
+        batch_size=batch_size,
         class_mode='categorical')
 
     validation_generator = data_generator.flow_from_directory(
@@ -67,16 +77,18 @@ def fit_model(data_dir, model_dir, epochs=3):
         target_size=(IMAGE_SIZE, IMAGE_SIZE),
         class_mode='categorical')
 
-    model.fit_generator(
+    early_stopping = EarlyStopping(monitor='val_loss', min_delta=0.01)
+    history = model.fit_generator(
         train_generator,
-        steps_per_epoch=3,
-        epochs=epochs,
+        epochs=max_epochs,
+        callbacks=[early_stopping],
         validation_data=validation_generator,
         validation_steps=1)
 
     model.save(f'{model_dir}/model.h5')
+    # TODO - save history
 
-    return model
+    return model, history
 
 
 def make_predictions(model, img_paths, things):
