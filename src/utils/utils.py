@@ -1,4 +1,14 @@
 import json
+import os
+
+
+def format_string(thing:str):
+    return thing.lower().replace(" ", "_")
+
+
+def list_all_files(directory):
+    return [os.path.join(directory, f) for f in os.listdir(directory)]
+
 
 def decode_predictions(preds, top=5, class_list_path=None):
   """Decodes the prediction of an ImageNet model.

@@ -9,7 +9,8 @@ from tensorflow.python.keras.preprocessing.image import load_img, img_to_array
 from tensorflow.python.keras.models import load_model
 from tensorflow.python.keras.callbacks import EarlyStopping
 
-from src.data.download_data import download_google_images
+from ..utils import utils
+from ..data import download_data
 
 
 DATA_ROOT = '../data/raw'
@@ -22,9 +23,9 @@ IMAGE_SIZE = 224
 def distinguish_two_things(thing1, thing2):
     (data_dir, model_dir) = initialize_project(thing1, thing2)
 
-    download_google_images([thing1, thing2], data_dir)
+    download_data.download_google_images([thing1, thing2], data_dir)
 
-    model = fit_model(data_dir, model_dir)
+    model, history = fit_model(data_dir, model_dir)
 
     # To load model and make predictions interactively:
     if False:
@@ -35,8 +36,8 @@ def distinguish_two_things(thing1, thing2):
 
 def initialize_project(thing1, thing2):
     # get folder-friendly names
-    thing1_fmt = format_string(thing1)
-    thing2_fmt = format_string(thing2)
+    thing1_fmt = utils.format_string(thing1)
+    thing2_fmt = utils.format_string(thing2)
 
     project_name = thing1_fmt + '_vs_' + thing2_fmt
 
@@ -100,20 +101,9 @@ def make_predictions(model, img_paths, things):
     return list(zip(pred_class, class_prob))
 
 
-def format_string(thing:str):
-    return thing.lower().replace(" ", "_")
-
-
 def make_project_dirs(project_name, existsok=True):
     data_dir = f'{DATA_ROOT}/{project_name}'
     model_dir = f'{MODEL_ROOT}/{project_name}'
-
-    # for directory in [data_dir, model_dir]:
-    #     if os._exists(directory):
-    #         if existsok:
-    #             pass
-    #         else:
-    #             raise FileExistsError(f'{directory} already exists')
 
     os.makedirs(data_dir, exist_ok=existsok)
     os.makedirs(f'{data_dir}/train', exist_ok=existsok)
@@ -128,15 +118,11 @@ def read_and_prep_images(img_paths, img_height=IMAGE_SIZE, img_width=IMAGE_SIZE)
     return preprocess_input(img_array)
 
 
-def list_all_files(directory):
-    return [os.path.join(directory, f) for f in os.listdir(directory)]
-
-
 def get_val_image_paths(things, data_dir, n=10, seed=1):
     img_paths = []
     for i, thing in enumerate(things):
-        image_dir = str(i) + '_' + format_string(thing)
-        img_paths += list_all_files(f'{data_dir}/val/{image_dir}')
+        image_dir = str(i) + '_' + utils.format_string(thing)
+        img_paths += utils.list_all_files(f'{data_dir}/val/{image_dir}')
 
     np.random.seed(seed)
     img_paths = np.random.choice(img_paths, n, replace=False)

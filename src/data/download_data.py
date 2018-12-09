@@ -1,7 +1,7 @@
 import os
 import zipfile
 from google_images_download import google_images_download
-from src.models.transfer_learning_model import format_string
+from ..utils import utils
 
 RAW_DATA_DIR = '.../data/raw'
 
@@ -26,7 +26,7 @@ def download_google_images(things:list, project_dir:str, image_limit=50):
 
     for i, thing in enumerate(things):
         # Maintain thing order in directories to ensure proper labelling
-        image_dir = str(i) + '_' + format_string(thing)
+        image_dir = str(i) + '_' + utils.format_string(thing)
 
         arguments = {"keywords": thing, "limit": image_limit, "print_urls": False,
                      'size': 'medium', 'format': 'jpg'}
