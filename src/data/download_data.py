@@ -17,7 +17,15 @@ def unzip_data(data_dir):
         os.remove(filepath)
 
 
-def download_google_images(things:list, project_dir:str, image_limit=50):
+def download_google_images(things: list, project_dir: str, image_limit=100):
+    """
+    For each thing, runs a Google image search and saves a training and validation image set
+    in a predetermined folder structure (for later modelling)
+    :param things: List of things for Google image search
+    :param project_dir: Data Root in which to store
+    :param image_limit: Maximum number of images for each query (for each thing and val/training set)
+    :return: None
+    """
     response = google_images_download.googleimagesdownload()
 
     # We could randomly sample train/val, but for now we'll temporally separate
@@ -35,6 +43,7 @@ def download_google_images(things:list, project_dir:str, image_limit=50):
                           'image_directory': image_dir,
                           'time_range': train_range})
         paths = response.download(arguments)
+        # Not sure why, but often downloads non jpg files
         delete_non_jpegs(f'{project_dir}/train/{image_dir}')
 
         arguments.update({'output_directory': project_dir + '/val',
@@ -45,6 +54,7 @@ def download_google_images(things:list, project_dir:str, image_limit=50):
 
 
 def delete_non_jpegs(directory):
+    """For a given directory, deletes non .jpg files"""
     non_jpgs = [f for f in os.listdir(directory) if f[-4:] != '.jpg']
     if len(non_jpgs) > 0:
         [os.remove(f'{directory}/{f}') for f in non_jpgs]
@@ -52,5 +62,6 @@ def delete_non_jpegs(directory):
 
 if __name__ == '__main__':
     pass
+    # Originally, I downloaded the dog breed ID set
     # !kaggle competitions download -c dog-breed-identification
     # unzip_data(RAW_DATA_DIR)

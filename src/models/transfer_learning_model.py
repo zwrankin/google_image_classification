@@ -21,6 +21,7 @@ IMAGE_SIZE = 224
 
 
 def distinguish_two_things(thing1, thing2):
+    """Main function for future click implementation, for now just runs in notebooks"""
     (data_dir, model_dir) = initialize_project(thing1, thing2)
 
     download_data.download_google_images([thing1, thing2], data_dir)
@@ -35,6 +36,7 @@ def distinguish_two_things(thing1, thing2):
 
 
 def initialize_project(thing1, thing2):
+    """Creates data a model directories"""
     # get folder-friendly names
     thing1_fmt = utils.format_string(thing1)
     thing2_fmt = utils.format_string(thing2)
@@ -92,7 +94,11 @@ def fit_model(data_dir, model_dir, max_epochs=10, batch_size=20):
     return model, history
 
 
-def make_predictions(model, img_paths, things):
+def make_predictions(model, img_paths: list, things: list):
+    """"
+    Fits model to img_paths
+    Returns: list of tuples of prediction and predicted probability
+    """
     imgs = read_and_prep_images(img_paths)
     preds = model.predict(imgs)
     pred_class = [things[0] if preds[i, 0] >= 0.5 else things[1] for i in range(0, len(preds))]
@@ -119,6 +125,7 @@ def read_and_prep_images(img_paths, img_height=IMAGE_SIZE, img_width=IMAGE_SIZE)
 
 
 def get_val_image_paths(things, data_dir, n=10, seed=1):
+    """Get paths to a subset of validation images of both things"""
     img_paths = []
     for i, thing in enumerate(things):
         image_dir = str(i) + '_' + utils.format_string(thing)
