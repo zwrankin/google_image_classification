@@ -71,7 +71,7 @@ six==1.11.0
 sklearn==0.0
 -e git+https://github.com/zwrankin/dog-breed-image-recognition.git@c0cd134eb4d0e7069897dbde13ed29804aa8dcd6#egg=src
 tensorboard==1.12.0
-tensorflow==1.12.0
+tensorflow==2.5.1
 termcolor==1.1.0
 terminado==0.8.1
 testpath==0.4.2
